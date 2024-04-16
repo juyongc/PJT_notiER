@@ -1,6 +1,6 @@
 package com.notier.controller;
 
-import com.notier.rateService.RateService;
+import com.notier.rateService.HelloService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
-    private final RateService rateService;
+    private final HelloService helloService;
 
     @GetMapping("/hello")
     public String hello() {
-        rateService.sendKafkaMessage();
+        helloService.sendKafkaTestMessage();
         return "hello";
     }
+
+
 }
