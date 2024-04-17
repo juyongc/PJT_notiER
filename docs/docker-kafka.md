@@ -66,6 +66,7 @@ networks:
 ```shell
 docker-compose exec -it Kafka01Service /bin/bash
 
+// 토픽 생성 (name = error-messages)
 kafka-topics.sh --create --topic error-messages --bootstrap-server Kafka00Service:9092,Kafka01Service:9092,Kafka02Service:9092 --partitions 3 --replication-factor 2
 
 kafka-console-producer.sh --topic error-messages --bootstrap-server Kafka00Service:9092,Kafka01Service:9092,Kafka02Service:9092
