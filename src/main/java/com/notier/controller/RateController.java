@@ -16,6 +16,4 @@ public class RateController {
         rateService.sendCurrencyMessage();
         return "us dollar~~";
     }
-
-
 }

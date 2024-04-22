@@ -1,13 +1,15 @@
 package com.notier.rateService;
 
+import com.notier.dto.SendAlarmResponseDto;
 import com.notier.entity.AlarmEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyRepository;
-import com.notier.repository.MemberRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 @Transactional
+@Slf4j
 public class RateService {
 
 
-    private final MemberRepository memberRepository;
     private final AlarmRepository alarmRepository;
     private final CurrencyRepository currencyRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final SseService sseService;
 
     public void sendCurrencyMessage() {
 
@@ -42,20 +46,21 @@ public class RateService {
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
         String country = consumerRecord.key();
-        String rate = consumerRecord.value();
 
         List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyCountry(country);
-        for (AlarmEntity alarmEntity : alarmEntities) {
 
-            System.out.println("--------------------------------------------------------");
-            System.out.println("User = " + alarmEntity.getMemberEntity().getName());
-            System.out.println("Current Currency = " + rate);
-            System.out.println("alarmEntity.getWishRate() = " + alarmEntity.getWishRate());
-            System.out.println("--------------------------------------------------------");
+        alarmEntities.forEach(alarmEntity -> log.info(alarmEntity.toString()));
 
-        }
+        alarmEntities.stream()
+            .map(alarmEntity -> SendAlarmResponseDto.builder()
+                .currencyId(alarmEntity.getCurrencyEntity().getId())
+                .memberId(alarmEntity.getMemberEntity().getId())
+                .memberName(alarmEntity.getMemberEntity().getName())
+                .country(alarmEntity.getCurrencyEntity().getCountry())
+                .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
+                .build())
+            .forEach(sseService::noticeCurrencyToUser);
 
     }
-
 
 }
