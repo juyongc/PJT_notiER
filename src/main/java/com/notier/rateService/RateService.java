@@ -1,15 +1,17 @@
 package com.notier.rateService;
 
+import com.notier.dto.CurrentCurrencyResponseDto;
 import com.notier.dto.SendAlarmResponseDto;
 import com.notier.entity.AlarmEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyRepository;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,8 @@ public class RateService {
     private final AlarmRepository alarmRepository;
     private final CurrencyRepository currencyRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final SseService sseService;
+    private final Random random = new Random();
 
     public void sendCurrencyMessage() {
 
@@ -60,6 +62,18 @@ public class RateService {
                 .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
                 .build())
             .forEach(sseService::noticeCurrencyToUser);
+
+    }
+
+    public CurrentCurrencyResponseDto findCurrentCurrency(String country) {
+        CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByCountry(country)
+            .orElseThrow(() -> new NoSuchElementException("존재하지 않는 국가입니다"));
+
+        Long currencyRate = currencyEntity.getExchangeRate() + random.nextInt(21) - 10;
+
+        return CurrentCurrencyResponseDto.builder()
+            .country(country)
+            .exchangeRate(currencyRate).build();
 
     }
 
