@@ -27,7 +27,7 @@ public class RateController {
     @GetMapping("/current-currency/{country}")
     public ResponseEntity<CurrentCurrencyResponseDto> getCurrentCurrency(@PathVariable("country") String country) {
 
-        CurrentCurrencyResponseDto responseDto = rateService.findCurrentCurrency(country);
+        CurrentCurrencyResponseDto responseDto = rateService.modifyCurrentCurrency(country);
 
         return ResponseEntity.ok(responseDto);
     }
