@@ -3,8 +3,10 @@ package com.notier.rateService;
 import com.notier.dto.CurrentCurrencyResponseDto;
 import com.notier.dto.SendAlarmResponseDto;
 import com.notier.entity.AlarmEntity;
+import com.notier.entity.AlarmLogEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.entity.CurrencyLogEntity;
+import com.notier.repository.AlarmLogRepository;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyLogRepository;
 import com.notier.repository.CurrencyRepository;
@@ -27,6 +29,7 @@ public class RateService {
 
 
     private final AlarmRepository alarmRepository;
+    private final AlarmLogRepository alarmLogRepository;
     private final CurrencyRepository currencyRepository;
     private final CurrencyLogRepository currencyLogRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -56,14 +59,34 @@ public class RateService {
 
         alarmEntities.forEach(alarmEntity -> log.info(alarmEntity.toString()));
 
+        // 알람 로그 저장 및 sse 전송
         alarmEntities.stream()
-            .map(alarmEntity -> SendAlarmResponseDto.builder()
-                .currencyId(alarmEntity.getCurrencyEntity().getId())
-                .memberId(alarmEntity.getMemberEntity().getId())
-                .memberName(alarmEntity.getMemberEntity().getName())
-                .country(alarmEntity.getCurrencyEntity().getCountry())
-                .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
-                .build())
+            .map(alarmEntity -> {
+
+                alarmLogRepository.save(
+                    AlarmLogEntity.builder()
+                        .currencyEntity(alarmEntity.getCurrencyEntity())
+                        .memberEntity(alarmEntity.getMemberEntity())
+                        .wishRate(alarmEntity.getWishRate())
+                        .build()
+                );
+
+                if (alarmEntity.getWishRate() > alarmEntity.getCurrencyEntity().getExchangeRate()) {
+                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가보다 낮습니다");
+                } else if (alarmEntity.getWishRate().equals(alarmEntity.getCurrencyEntity().getExchangeRate())) {
+                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가입니다");
+                } else {
+                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가보다 높습니다");
+                }
+
+                return SendAlarmResponseDto.builder()
+                    .currencyId(alarmEntity.getCurrencyEntity().getId())
+                    .memberId(alarmEntity.getMemberEntity().getId())
+                    .memberName(alarmEntity.getMemberEntity().getName())
+                    .country(alarmEntity.getCurrencyEntity().getCountry())
+                    .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
+                    .build();
+            })
             .forEach(sseService::noticeCurrencyToUser);
 
     }
