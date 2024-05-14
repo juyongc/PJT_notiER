@@ -26,4 +26,11 @@ public class CurrencyEntity {
     private String country;
     private Long exchangeRate;
 
+    public void updateExchangeRate(Long updatedRate) {
+        this.exchangeRate = updatedRate;
+
+
+    }
+
+
 }

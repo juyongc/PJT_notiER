@@ -4,7 +4,9 @@ import com.notier.dto.CurrentCurrencyResponseDto;
 import com.notier.dto.SendAlarmResponseDto;
 import com.notier.entity.AlarmEntity;
 import com.notier.entity.CurrencyEntity;
+import com.notier.entity.CurrencyLogEntity;
 import com.notier.repository.AlarmRepository;
+import com.notier.repository.CurrencyLogRepository;
 import com.notier.repository.CurrencyRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,6 +28,7 @@ public class RateService {
 
     private final AlarmRepository alarmRepository;
     private final CurrencyRepository currencyRepository;
+    private final CurrencyLogRepository currencyLogRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final SseService sseService;
     private final Random random = new Random();
@@ -65,16 +68,34 @@ public class RateService {
 
     }
 
-    public CurrentCurrencyResponseDto findCurrentCurrency(String country) {
+    /**
+     * 환율 변동 확인 메서드
+     */
+    public CurrentCurrencyResponseDto modifyCurrentCurrency(String country) {
         CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByCountry(country)
             .orElseThrow(() -> new NoSuchElementException("존재하지 않는 국가입니다"));
 
         Long currencyRate = currencyEntity.getExchangeRate() + random.nextInt(21) - 10;
+        modifyCurrencyEntityAndAddLog(currencyEntity, currencyRate);
 
         return CurrentCurrencyResponseDto.builder()
             .country(country)
             .exchangeRate(currencyRate).build();
+    }
 
+    /**
+     * 변경된 환율 db update 및 이력 저장
+     */
+    private void modifyCurrencyEntityAndAddLog(CurrencyEntity currencyEntity, Long currencyRate) {
+        currencyEntity.updateExchangeRate(currencyRate);
+        currencyRepository.save(currencyEntity);
+
+        CurrencyLogEntity currencyLogEntity = CurrencyLogEntity.builder()
+            .country(currencyEntity.getCountry())
+            .exchangeRate(currencyRate)
+            .build();
+
+        currencyLogRepository.save(currencyLogEntity);
     }
 
 }
