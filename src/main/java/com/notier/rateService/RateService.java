@@ -100,6 +100,7 @@ public class RateService {
 
         Long currencyRate = currencyEntity.getExchangeRate() + random.nextInt(21) - 10;
         modifyCurrencyEntityAndAddLog(currencyEntity, currencyRate);
+        sendCurrencyMessage();
 
         return CurrentCurrencyResponseDto.builder()
             .country(country)
