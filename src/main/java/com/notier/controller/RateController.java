@@ -14,6 +14,7 @@ public class RateController {
 
     private final RateService rateService;
 
+    // 전송 테스트용 컨트롤러 - 하위 getCurrentCurrency 내부 서비스에 포함돼서 실제 서비스 사용 X
     @GetMapping("/notice-us")
     public String alarmUsChange() {
         rateService.sendCurrencyMessage();
