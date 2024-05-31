@@ -7,7 +7,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Repository
 public interface EmitterRepository {
 
-    SseEmitter save(String emitterId, SseEmitter sseEmitter);
+    void save(String emitterId, SseEmitter sseEmitter);
 
     void saveEventCache(String eventCacheId, Object event);
 

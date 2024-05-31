@@ -14,9 +14,8 @@ public class EmitterRepositoryImpl implements EmitterRepository {
 
 
     @Override
-    public SseEmitter save(String emitterId, SseEmitter sseEmitter) {
+    public void save(String emitterId, SseEmitter sseEmitter) {
         emitters.put(emitterId, sseEmitter);
-        return sseEmitter;
     }
 
     @Override

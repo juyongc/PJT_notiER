@@ -36,13 +36,9 @@ public class RateService {
     private final SseService sseService;
     private final Random random = new Random();
 
-    public void sendCurrencyMessage() {
-
-        List<CurrencyEntity> currencyEntities = currencyRepository.findAll();
-        for (CurrencyEntity currencyEntity : currencyEntities) {
-            kafkaTemplate.send("currency-" + currencyEntity.getCountry(), currencyEntity.getCountry(), String.valueOf(currencyEntity.getExchangeRate()));
-        }
-
+    public void sendCurrencyMessage(CurrencyEntity currencyEntity) {
+        kafkaTemplate.send("currency-" + currencyEntity.getCountry(), currencyEntity.getCountry(),
+            String.valueOf(currencyEntity.getExchangeRate()));
     }
 
     /**
@@ -50,10 +46,11 @@ public class RateService {
      * key가 country라서 안되는 상황
      * => ConsumerRecord 를 사용해서 key, value를 가져올 수 있다
      */
-    @KafkaListener(id = "currency-us-listen", topics = "currency-us")
+    @KafkaListener(id = "currency-listen", topics = {"currency-us", "currency-jp"})
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
         String country = consumerRecord.key();
+        log.info("current country = " + country);
 
         List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyCountry(country);
 
@@ -100,7 +97,7 @@ public class RateService {
 
         Long currencyRate = currencyEntity.getExchangeRate() + random.nextInt(21) - 10;
         modifyCurrencyEntityAndAddLog(currencyEntity, currencyRate);
-        sendCurrencyMessage();
+        sendCurrencyMessage(currencyEntity);
 
         return CurrentCurrencyResponseDto.builder()
             .country(country)

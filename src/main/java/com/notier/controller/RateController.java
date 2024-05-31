@@ -1,7 +1,10 @@
 package com.notier.controller;
 
 import com.notier.dto.CurrentCurrencyResponseDto;
+import com.notier.entity.CurrencyEntity;
 import com.notier.rateService.RateService;
+import com.notier.repository.CurrencyRepository;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class RateController {
 
     private final RateService rateService;
+    private final CurrencyRepository currencyRepository;
 
     // 전송 테스트용 컨트롤러 - 하위 getCurrentCurrency 내부 서비스에 포함돼서 실제 서비스 사용 X
     @GetMapping("/notice-us")
     public String alarmUsChange() {
-        rateService.sendCurrencyMessage();
+        CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByCountry("us")
+            .orElseThrow(() -> new NoSuchElementException("존재하지 않는 국가입니다"));
+        rateService.sendCurrencyMessage(currencyEntity);
         return "us dollar~~";
     }
 

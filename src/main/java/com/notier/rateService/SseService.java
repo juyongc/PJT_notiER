@@ -40,12 +40,12 @@ public class SseService {
         return emitter;
     }
 
-    public SseEmitter noticeCurrencyToUser(SendAlarmResponseDto sendAlarmResponseDto) {
+    public void noticeCurrencyToUser(SendAlarmResponseDto sendAlarmResponseDto) {
 
         String emitterId = makeEmitterId(sendAlarmResponseDto.getCountry());
         SseEmitter emitter = emitterRepositoryImpl.find(emitterId).orElse(null);
         if (emitter == null) {
-            return null;
+            return;
         }
 
         try {
@@ -58,7 +58,6 @@ public class SseService {
         } catch (IOException e) {
             emitter.completeWithError(e);
         }
-        return emitter;
     }
 
     private String makeEmitterId(String country) {
