@@ -6,7 +6,6 @@ import com.notier.entity.MemberEntity;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyRepository;
 import com.notier.repository.MemberRepository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.NoSuchElementException;
@@ -15,10 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+//@TestPropertySource(locations = "classpath:application-test.yml")
+@ActiveProfiles("test")
 class RepositoryTest {
 
     @Autowired
