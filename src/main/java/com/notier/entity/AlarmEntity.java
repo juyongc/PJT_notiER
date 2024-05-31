@@ -35,4 +35,13 @@ public class AlarmEntity {
 
     private Long wishRate;
 
+    @Override
+    public String toString() {
+        return "AlarmEntity{" +
+            "id=" + id +
+            ", currencyEntity=" + currencyEntity +
+            ", memberEntity=" + memberEntity +
+            ", wishRate=" + wishRate +
+            '}';
+    }
 }
