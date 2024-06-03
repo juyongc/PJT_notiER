@@ -17,9 +17,9 @@ public class SseService {
     private final EmitterRepository emitterRepositoryImpl;
 
 
-    public SseEmitter subscribe(String country) {
+    public SseEmitter subscribe(String ticker) {
 
-        String emitterId = makeEmitterId(country);
+        String emitterId = makeEmitterId(ticker);
         SseEmitter emitter = emitterRepositoryImpl.find(emitterId)
             .orElseGet(() -> {
                 SseEmitter newEmitter = new SseEmitter(DEFAULT_TIMEOUT);
@@ -42,7 +42,7 @@ public class SseService {
 
     public void noticeCurrencyToUser(SendAlarmResponseDto sendAlarmResponseDto) {
 
-        String emitterId = makeEmitterId(sendAlarmResponseDto.getCountry());
+        String emitterId = makeEmitterId(sendAlarmResponseDto.getTicker());
         SseEmitter emitter = emitterRepositoryImpl.find(emitterId).orElse(null);
         if (emitter == null) {
             return;
@@ -52,7 +52,7 @@ public class SseService {
             log.info("sendAlarmResponseDto = " + sendAlarmResponseDto);
             emitter.send(SseEmitter.event()
                 .id(emitterId)
-                .name("currency-update : " + sendAlarmResponseDto.getCountry())
+                .name("currency-update : " + sendAlarmResponseDto.getTicker())
                 .data(sendAlarmResponseDto)
             );
         } catch (IOException e) {
@@ -60,9 +60,9 @@ public class SseService {
         }
     }
 
-    private String makeEmitterId(String country) {
+    private String makeEmitterId(String ticker) {
 
-        return country + "- Connection";
+        return ticker + "- Connection";
     }
 
 }

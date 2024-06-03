@@ -14,13 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
 //@TestPropertySource(locations = "classpath:application-test.yml")
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 class RepositoryTest {
 
     @Autowired
@@ -48,17 +47,8 @@ class RepositoryTest {
             .build();
         memberRepository.save(lee);
 
-        CurrencyEntity korea = CurrencyEntity.builder()
-            .country("korea")
-            .exchangeRate(1L)
-            .build();
-        currencyRepository.save(korea);
-
-        CurrencyEntity us = CurrencyEntity.builder()
-            .country("us")
-            .exchangeRate(1350L)
-            .build();
-        currencyRepository.save(us);
+        CurrencyEntity us = currencyRepository.findCurrencyEntityByTicker("USD")
+            .orElseThrow(() -> new NoSuchElementException("없는 티커입니다"));
 
         AlarmEntity alarm1 = AlarmEntity.builder()
             .currencyEntity(us)

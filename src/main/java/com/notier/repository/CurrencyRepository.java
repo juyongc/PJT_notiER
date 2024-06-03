@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CurrencyRepository extends JpaRepository<CurrencyEntity, Long> {
 
-    Optional<CurrencyEntity> findCurrencyEntityByCountry(String country);
+    Optional<CurrencyEntity> findCurrencyEntityByTicker(String ticker);
 
 }

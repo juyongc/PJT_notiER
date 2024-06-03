@@ -13,7 +13,7 @@ public class SendAlarmResponseDto {
     private Long memberId;
     private String memberName;
     private Long currencyId;
-    private String country;
+    private String ticker;
     private Long exchangeRate;
 
     @Override
@@ -22,7 +22,7 @@ public class SendAlarmResponseDto {
             "memberId=" + memberId +
             ", memberName='" + memberName + '\'' +
             ", currencyId=" + currencyId +
-            ", country='" + country + '\'' +
+            ", country='" + ticker + '\'' +
             ", exchangeRate=" + exchangeRate +
             '}';
     }
