@@ -13,10 +13,10 @@ public class SseController {
 
     private final SseService sseService;
 
-    @GetMapping(value = "/send-alarm/{country}", produces = "text/event-stream")
-    public SseEmitter sendAlarm(@PathVariable("country") String country) {
+    @GetMapping(value = "/send-alarm/{ticker}", produces = "text/event-stream")
+    public SseEmitter sendAlarm(@PathVariable("ticker") String ticker) {
 
-        return sseService.subscribe(country);
+        return sseService.subscribe(ticker);
 
     }
 

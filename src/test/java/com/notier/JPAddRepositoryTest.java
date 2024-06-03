@@ -41,11 +41,8 @@ class JPAddRepositoryTest {
         MemberEntity lee = memberRepository.findMemberEntityByName("lee")
             .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다"));
 
-        CurrencyEntity japan = CurrencyEntity.builder()
-            .country("jp")
-            .exchangeRate(880L)
-            .build();
-        currencyRepository.save(japan);
+        CurrencyEntity japan = currencyRepository.findCurrencyEntityByTicker("JPY")
+            .orElseThrow(() -> new NoSuchElementException("없는 티커입니다"));
 
         AlarmEntity alarm1 = AlarmEntity.builder()
             .currencyEntity(japan)

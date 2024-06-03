@@ -9,7 +9,7 @@ import lombok.Setter;
 @Builder
 public class CurrentCurrencyResponseDto {
 
-    private String country;
+    private String ticker;
     private Long exchangeRate;
 
 }

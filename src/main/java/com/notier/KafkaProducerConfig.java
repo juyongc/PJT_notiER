@@ -48,11 +48,11 @@ public class KafkaProducerConfig {
      */
     @Bean
     public NewTopics topics() {
-        return new NewTopics(TopicBuilder.name("currency-us")
+        return new NewTopics(TopicBuilder.name("currency-USD")
             .partitions(3)
             .replicas(1)
             .build(),
-            TopicBuilder.name("currency-jp")
+            TopicBuilder.name("currency-JPY")
                 .partitions(3)
                 .replicas(1)
                 .build());

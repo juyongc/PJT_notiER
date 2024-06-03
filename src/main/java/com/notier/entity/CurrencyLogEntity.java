@@ -28,7 +28,7 @@ public class CurrencyLogEntity extends BaseEntity {
 //    @JoinColumn(name = "currency_id")
 //    private CurrencyEntity currencyEntity;
 
-    private String country;
-
+    private String ticker;
+    private String explanation;
     private Long exchangeRate;
 }

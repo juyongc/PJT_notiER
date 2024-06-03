@@ -37,7 +37,7 @@ public class RateService {
     private final Random random = new Random();
 
     public void sendCurrencyMessage(CurrencyEntity currencyEntity) {
-        kafkaTemplate.send("currency-" + currencyEntity.getCountry(), currencyEntity.getCountry(),
+        kafkaTemplate.send("currency-" + currencyEntity.getTicker(), currencyEntity.getTicker(),
             String.valueOf(currencyEntity.getExchangeRate()));
     }
 
@@ -46,13 +46,13 @@ public class RateService {
      * key가 country라서 안되는 상황
      * => ConsumerRecord 를 사용해서 key, value를 가져올 수 있다
      */
-    @KafkaListener(id = "currency-listen", topics = {"currency-us", "currency-jp"})
+    @KafkaListener(id = "currency-listen", topics = {"currency-USD", "currency-JPY"})
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
-        String country = consumerRecord.key();
-        log.info("current country = " + country);
+        String ticker = consumerRecord.key();
+        log.info("current ticker = " + ticker);
 
-        List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyCountry(country);
+        List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyTicker(ticker);
 
         alarmEntities.forEach(alarmEntity -> log.info(alarmEntity.toString()));
 
@@ -80,7 +80,7 @@ public class RateService {
                     .currencyId(alarmEntity.getCurrencyEntity().getId())
                     .memberId(alarmEntity.getMemberEntity().getId())
                     .memberName(alarmEntity.getMemberEntity().getName())
-                    .country(alarmEntity.getCurrencyEntity().getCountry())
+                    .ticker(alarmEntity.getCurrencyEntity().getTicker())
                     .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
                     .build();
             })
@@ -91,8 +91,8 @@ public class RateService {
     /**
      * 환율 변동 확인 메서드
      */
-    public CurrentCurrencyResponseDto modifyCurrentCurrency(String country) {
-        CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByCountry(country)
+    public CurrentCurrencyResponseDto modifyCurrentCurrency(String ticker) {
+        CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByTicker(ticker)
             .orElseThrow(() -> new NoSuchElementException("존재하지 않는 국가입니다"));
 
         Long currencyRate = currencyEntity.getExchangeRate() + random.nextInt(21) - 10;
@@ -100,7 +100,7 @@ public class RateService {
         sendCurrencyMessage(currencyEntity);
 
         return CurrentCurrencyResponseDto.builder()
-            .country(country)
+            .ticker(ticker)
             .exchangeRate(currencyRate).build();
     }
 
@@ -112,7 +112,8 @@ public class RateService {
         currencyRepository.save(currencyEntity);
 
         CurrencyLogEntity currencyLogEntity = CurrencyLogEntity.builder()
-            .country(currencyEntity.getCountry())
+            .ticker(currencyEntity.getTicker())
+            .explanation(currencyEntity.getExplanation())
             .exchangeRate(currencyRate)
             .build();
 

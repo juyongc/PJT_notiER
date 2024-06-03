@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AlarmRepository extends JpaRepository<AlarmEntity, Long> {
 
-    @Query("select ae from AlarmEntity ae inner join ae.currencyEntity ce where ce.country = :country")
-    List<AlarmEntity> findAlarmEntitiesByCurrencyCountry(String country);
+    @Query("select ae from AlarmEntity ae inner join ae.currencyEntity ce where ce.ticker = :ticker")
+    List<AlarmEntity> findAlarmEntitiesByCurrencyTicker(String ticker);
 
 }

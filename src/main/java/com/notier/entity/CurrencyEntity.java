@@ -23,14 +23,21 @@ public class CurrencyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String country;
+    private String ticker;
+    private String explanation;
     private Long exchangeRate;
 
     public void updateExchangeRate(Long updatedRate) {
         this.exchangeRate = updatedRate;
-
-
     }
 
-
+    @Override
+    public String toString() {
+        return "CurrencyEntity{" +
+            "id=" + id +
+            ", country='" + ticker + '\'' +
+            ", rateUnit='" + explanation + '\'' +
+            ", exchangeRate=" + exchangeRate +
+            '}';
+    }
 }
