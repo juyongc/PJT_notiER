@@ -28,14 +28,22 @@ public class RateController {
     }
 
     /**
+     * 임의로 전체 실시간 환율 주는 api
+     * db에 저장된 기준값을 기준으로 -10 ~ +10 까지 랜덤으로 값을 줌
+     */
+    @GetMapping("/batch/current-currency")
+    public ResponseEntity<String> getCurrentCurrencyAll() {
+        rateService.modifyAllCurrentCurrency();
+        return ResponseEntity.ok("success");
+    }
+
+    /**
      * 실시간 환율 가져오는 api는 현재 유료 서비스라서 임의로 실시간 환율 주는 api
      * db에 저장된 기준값을 기준으로 -10 ~ +10 까지 랜덤으로 값을 줌
      */
     @GetMapping("/current-currency/{ticker}")
     public ResponseEntity<CurrentCurrencyResponseDto> getCurrentCurrency(@PathVariable("ticker") String ticker) {
-
         CurrentCurrencyResponseDto responseDto = rateService.modifyCurrentCurrency(ticker);
-
         return ResponseEntity.ok(responseDto);
     }
 }
