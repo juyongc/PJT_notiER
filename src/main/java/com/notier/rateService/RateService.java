@@ -89,7 +89,22 @@ public class RateService {
     }
 
     /**
-     * 환율 변동 확인 메서드
+     * 전체 환율 변동 메서드
+     */
+    public void modifyAllCurrentCurrency() {
+        List<CurrencyEntity> currencyEntities = currencyRepository.findAll();
+
+        currencyEntities.stream()
+            .filter(ce -> !ce.getTicker().equals("KRW"))
+            .forEach(ce -> {
+                Long currencyRate = ce.getExchangeRate() + random.nextInt(21) - 10;
+                modifyCurrencyEntityAndAddLog(ce, currencyRate);
+                sendCurrencyMessage(ce);
+            });
+    }
+
+    /**
+     * 환율 변동 메서드
      */
     public CurrentCurrencyResponseDto modifyCurrentCurrency(String ticker) {
         CurrencyEntity currencyEntity = currencyRepository.findCurrencyEntityByTicker(ticker)
