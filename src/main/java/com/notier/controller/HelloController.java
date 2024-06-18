@@ -17,5 +17,10 @@ public class HelloController {
         return "hello";
     }
 
+    @GetMapping("greeting")
+    public String greeting() {
+        String memberName = helloService.greetingRandomMember();
+        return "Greeting!!! " + memberName;
+    }
 
 }
