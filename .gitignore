@@ -202,3 +202,4 @@ Temporary Items
 # Project exclude paths
 /.gradle/
 /build/
+/ngrinder-controller/

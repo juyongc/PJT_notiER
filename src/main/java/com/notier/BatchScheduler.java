@@ -22,7 +22,7 @@ public class BatchScheduler {
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
 
-    @Scheduled(cron = "0 * * * * *")    // 매분 실행
+    @Scheduled(cron = "0 */10 * * * *")    // 매분 실행
     public void runExchangeBatchScheduler() {
         try {
             Job callJob = jobRegistry.getJob("callInternalExchangeApiJob");
@@ -34,5 +34,4 @@ public class BatchScheduler {
             e.printStackTrace();
         }
     }
-
 }
