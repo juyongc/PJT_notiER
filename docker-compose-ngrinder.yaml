@@ -11,7 +11,8 @@ services:
       - "12000-12009:12000-12009"
     volumes:
       - ./ngrinder-controller:/opt/ngrinder-controller
-
+    environment:
+      - TZ=Asia/Seoul
   agent:
     image: ngrinder/agent
     container_name: ngrinder-agent
@@ -19,3 +20,14 @@ services:
     restart: unless-stopped
     links:
       - controller
+    environment:
+      - TZ=Asia/Seoul
+  agent-2:
+    image: ngrinder/agent
+    container_name: ngrinder-agent-2
+    platform: linux/amd64
+    restart: unless-stopped
+    links:
+      - controller
+    environment:
+      - TZ=Asia/Seoul
