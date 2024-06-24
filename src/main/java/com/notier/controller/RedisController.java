@@ -17,13 +17,13 @@ public class RedisController {
 
     @PostMapping("/save")
     public String saveData(@RequestParam String key, @RequestParam Object value) {
-        redisService.saveData(key, value);
+        redisService.saveObjectValue(key, value);
         return "Save Success~~~!!";
     }
 
     @GetMapping("/get")
     public Object getData(@RequestParam String key) {
-        return redisService.getData(key);
+        return redisService.getObjectValue(key);
     }
 
 

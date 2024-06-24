@@ -6,6 +6,7 @@ import com.notier.entity.AlarmEntity;
 import com.notier.entity.AlarmLogEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.entity.CurrencyLogEntity;
+import com.notier.entity.MemberEntity;
 import com.notier.repository.AlarmLogRepository;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyLogRepository;
@@ -33,6 +34,7 @@ public class RateService {
     private final CurrencyRepository currencyRepository;
     private final CurrencyLogRepository currencyLogRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final RedisService redisService;
     private final SseService sseService;
     private final Random random = new Random();
 
@@ -54,38 +56,70 @@ public class RateService {
 
         List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyTicker(ticker);
 
-        alarmEntities.forEach(alarmEntity -> log.info(alarmEntity.toString()));
-
         // 알람 로그 저장 및 sse 전송
         alarmEntities.stream()
             .map(alarmEntity -> {
 
+                // 해당 통화로 유저에게 오늘 알람 보낸적 있는지 확인 -> 있으면 건너뜀
+                boolean checkedSendAlarm = redisService.checkAlreadySendAlarm(alarmEntity);
+                if (checkedSendAlarm) {
+                    return null;
+                }
+
+                Long userWishRate = alarmEntity.getWishRate();
+                CurrencyEntity currencyEntity = alarmEntity.getCurrencyEntity();
+                MemberEntity memberEntity = alarmEntity.getMemberEntity();
+
                 alarmLogRepository.save(
                     AlarmLogEntity.builder()
-                        .currencyEntity(alarmEntity.getCurrencyEntity())
-                        .memberEntity(alarmEntity.getMemberEntity())
-                        .wishRate(alarmEntity.getWishRate())
+                        .currencyEntity(currencyEntity)
+                        .memberEntity(memberEntity)
+                        .wishRate(userWishRate)
                         .build()
                 );
 
-                if (alarmEntity.getWishRate() > alarmEntity.getCurrencyEntity().getExchangeRate()) {
-                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가보다 낮습니다");
-                } else if (alarmEntity.getWishRate().equals(alarmEntity.getCurrencyEntity().getExchangeRate())) {
-                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가입니다");
+                /**
+                 * TODO
+                 * 쿼리 최적화할 수 있을듯
+                 * 매번 검색하지 말고 previous 값을 미리 가지고 있다면 1번만 select 해오면 됨
+                 **/
+                Long previousExchangeRate = getPreviousExchangeRate(currencyEntity);
+                Long currentExchangeRate = currencyEntity.getExchangeRate();
+
+                //  쿼리 생각해볼것
+                if (previousExchangeRate >= userWishRate && userWishRate > currentExchangeRate) {
+                    redisService.setSendAlarm(alarmEntity);
+                    log.info(memberEntity.getName() + "님이 지정하신 지정가보다 낮습니다");
+                    log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
+                        previousExchangeRate);
+                } else if (previousExchangeRate <= userWishRate && userWishRate < currentExchangeRate) {
+                    redisService.setSendAlarm(alarmEntity);
+                    log.info(memberEntity.getName() + "님이 지정하신 지정가보다 높습니다");
+                    log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
+                        previousExchangeRate);
+                } else if (userWishRate.equals(currentExchangeRate)) {
+                    redisService.setSendAlarm(alarmEntity);
+                    log.info(memberEntity.getName() + "님이 지정하신 지정가입니다");
+                    log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
+                        previousExchangeRate);
                 } else {
-                    log.info(alarmEntity.getMemberEntity().getName() + "님이 지정하신 지정가보다 높습니다");
+                    return null;
                 }
 
                 return SendAlarmResponseDto.builder()
-                    .currencyId(alarmEntity.getCurrencyEntity().getId())
-                    .memberId(alarmEntity.getMemberEntity().getId())
-                    .memberName(alarmEntity.getMemberEntity().getName())
-                    .ticker(alarmEntity.getCurrencyEntity().getTicker())
-                    .exchangeRate(alarmEntity.getCurrencyEntity().getExchangeRate())
+                    .currencyId(currencyEntity.getId())
+                    .memberId(memberEntity.getId())
+                    .memberName(memberEntity.getName())
+                    .ticker(currencyEntity.getTicker())
+                    .exchangeRate(currentExchangeRate)
                     .build();
             })
             .forEach(sseService::noticeCurrencyToUser);
+    }
 
+    private Long getPreviousExchangeRate(CurrencyEntity currencyEntity) {
+        Long previousExchangeRate = currencyLogRepository.previousExchangeRate(currencyEntity.getTicker());
+        return previousExchangeRate != null ? previousExchangeRate : 0L;
     }
 
     /**

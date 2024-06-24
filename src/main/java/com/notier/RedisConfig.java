@@ -16,14 +16,25 @@ public class RedisConfig {
         return new LettuceConnectionFactory();
     }
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
+    @Bean(name = "valueObjectRedisTemplate")
+    public RedisTemplate<String, Object> valueObjectRedisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
+
+    @Bean(name = "valueStringRedisTemplate")
+    public RedisTemplate<String, String> valueStringRedisTemplate() {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        return template;
+    }
+
+
 
 
 }
