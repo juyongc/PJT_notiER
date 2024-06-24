@@ -42,6 +42,10 @@ public class SseService {
 
     public void noticeCurrencyToUser(SendAlarmResponseDto sendAlarmResponseDto) {
 
+        if (sendAlarmResponseDto == null) {
+            return;
+        }
+
         String emitterId = makeEmitterId(sendAlarmResponseDto.getTicker());
         SseEmitter emitter = emitterRepositoryImpl.find(emitterId).orElse(null);
         if (emitter == null) {

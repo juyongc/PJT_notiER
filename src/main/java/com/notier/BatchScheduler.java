@@ -1,5 +1,6 @@
 package com.notier;
 
+import com.notier.rateService.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -21,8 +22,10 @@ public class BatchScheduler {
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
+    private final RedisService redisService;
 
-    @Scheduled(cron = "0 */10 * * * *")    // 매분 실행
+    //    @Scheduled(cron = "0 * * * * *")    // 매분 실행
+    @Scheduled(cron = "0 */3 * * * *")    // 3분마다 실행
     public void runExchangeBatchScheduler() {
         try {
             Job callJob = jobRegistry.getJob("callInternalExchangeApiJob");
@@ -34,4 +37,10 @@ public class BatchScheduler {
             e.printStackTrace();
         }
     }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void resetAlarmsAtMidNight() {
+        redisService.resetTodayAlarms();
+    }
+
 }
