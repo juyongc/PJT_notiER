@@ -1,6 +1,6 @@
-package com.notier.controller;
+package com.notier.backOffice;
 
-import com.notier.rateService.ExchangeService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/exchange")
 public class BackofficeController {
 
-    private final ExchangeService exchangeService;
+    private final BackofficeService backofficeService;
 
     @GetMapping("/init")
     public ResponseEntity<String> getExchangeInitData() {
-        exchangeService.callExchangeOpenApi();
+        backofficeService.callExchangeOpenApi();
         return ResponseEntity.ok("Success");
+    }
+
+    /**
+     * 모의로 만든 임의로 환율 값 주는 내부 api~
+     */
+    @GetMapping("/internal")
+    public ResponseEntity<List<BackofficeCurrencyResponseDto>> getCurrentExchangeData() {
+        List<BackofficeCurrencyResponseDto> responseDtoList = backofficeService.modifyAllCurrentCurrency();
+        return ResponseEntity.ok(responseDtoList);
     }
 
 }
