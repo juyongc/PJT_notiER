@@ -1,4 +1,4 @@
-package com.notier.dto;
+package com.notier.backOffice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
