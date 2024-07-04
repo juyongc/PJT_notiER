@@ -1,9 +1,11 @@
 package com.notier.controller;
 
+import com.notier.backOffice.ExchangeResponseDto;
 import com.notier.dto.CurrentCurrencyResponseDto;
 import com.notier.entity.CurrencyEntity;
 import com.notier.rateService.RateService;
 import com.notier.repository.CurrencyRepository;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,9 @@ public class RateController {
      * db에 저장된 기준값을 기준으로 -10 ~ +10 까지 랜덤으로 값을 줌
      */
     @GetMapping("/batch/current-currency")
-    public ResponseEntity<String> getCurrentCurrencyAll() {
-        rateService.modifyAllCurrentCurrency();
-        return ResponseEntity.ok("success");
+    public ResponseEntity<List<ExchangeResponseDto>> getCurrentCurrencyAll() {
+        List<ExchangeResponseDto> responseDtoList = rateService.callInternalCurrencyApi();
+        return ResponseEntity.ok(responseDtoList);
     }
 
     /**

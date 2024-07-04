@@ -1,5 +1,6 @@
 package com.notier.rateService;
 
+import com.notier.backOffice.ExchangeResponseDto;
 import com.notier.dto.CurrentCurrencyResponseDto;
 import com.notier.dto.SendAlarmResponseDto;
 import com.notier.entity.AlarmEntity;
@@ -11,16 +12,24 @@ import com.notier.repository.AlarmLogRepository;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyLogRepository;
 import com.notier.repository.CurrencyRepository;
+import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Service
@@ -36,7 +45,11 @@ public class RateService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final RedisService redisService;
     private final SseService sseService;
+    private final RestTemplate restTemplate;
     private final Random random = new Random();
+
+    @Value("${api.exchange-mock-currency-url}")
+    private String baseUrl;
 
     public void sendCurrencyMessage(CurrencyEntity currencyEntity) {
         kafkaTemplate.send("currency-" + currencyEntity.getTicker(), currencyEntity.getTicker(),
@@ -123,18 +136,42 @@ public class RateService {
     }
 
     /**
-     * 전체 환율 변동 메서드
+     * 외부 api 콜을 통한 currency Entity 갱신 및 카프카 메시지 전송
      */
-    public void modifyAllCurrentCurrency() {
-        List<CurrencyEntity> currencyEntities = currencyRepository.findAll();
+    public List<ExchangeResponseDto> callInternalCurrencyApi() {
 
-        currencyEntities.stream()
-            .filter(ce -> !ce.getTicker().equals("KRW"))
-            .forEach(ce -> {
-                Long currencyRate = ce.getExchangeRate() + random.nextInt(21) - 10;
-                modifyCurrencyEntityAndAddLog(ce, currencyRate);
-                sendCurrencyMessage(ce);
+        URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl)
+            .build()
+            .toUri();
+        ResponseEntity<List<ExchangeResponseDto>> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, null,
+            new ParameterizedTypeReference<List<ExchangeResponseDto>>() {
             });
+
+        List<ExchangeResponseDto> responseDtoList = Optional.ofNullable(responseEntity.getBody())
+            .orElseThrow(() -> new IllegalArgumentException("Need to check! We get null!!"));
+
+        responseDtoList.stream()
+            .filter(res -> !res.getTicker().equals("KRW"))
+            .forEach(res -> {
+                CurrencyEntity currencyEntity = getCurrencyEntity(res);
+                modifyCurrencyEntityAndAddLog(currencyEntity, res.getExchangeRate());
+                sendCurrencyMessage(currencyEntity);
+            });
+
+        return responseDtoList;
+    }
+
+    /**
+     * CurrencyEntity에서 해당 통화를 찾거나 없으면 신규 생성
+     */
+    private CurrencyEntity getCurrencyEntity(ExchangeResponseDto responseDto) {
+
+        return currencyRepository.findCurrencyEntityByTicker(responseDto.getTicker())
+            .orElseGet(() -> CurrencyEntity.builder()
+                .ticker(responseDto.getTicker())
+                .explanation(responseDto.getExplanation())
+                .exchangeRate(responseDto.getExchangeRate())
+                .build());
     }
 
     /**
@@ -154,18 +191,18 @@ public class RateService {
     }
 
     /**
-     * 변경된 환율 db update 및 이력 저장
+     * 변경된 환율 수정 후 db update & 이력 저장
      */
-    private void modifyCurrencyEntityAndAddLog(CurrencyEntity currencyEntity, Long currencyRate) {
-        currencyEntity.updateExchangeRate(currencyRate);
+    private void modifyCurrencyEntityAndAddLog(CurrencyEntity currencyEntity, Long exchangeRate) {
+
+        currencyEntity.updateExchangeRate(exchangeRate);
         currencyRepository.save(currencyEntity);
 
         CurrencyLogEntity currencyLogEntity = CurrencyLogEntity.builder()
             .ticker(currencyEntity.getTicker())
             .explanation(currencyEntity.getExplanation())
-            .exchangeRate(currencyRate)
+            .exchangeRate(currencyEntity.getExchangeRate())
             .build();
-
         currencyLogRepository.save(currencyLogEntity);
     }
 
