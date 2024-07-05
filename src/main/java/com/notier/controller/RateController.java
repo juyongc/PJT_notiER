@@ -30,8 +30,8 @@ public class RateController {
     }
 
     /**
-     * 임의로 전체 실시간 환율 주는 api
-     * db에 저장된 기준값을 기준으로 -10 ~ +10 까지 랜덤으로 값을 줌
+     * 외부 api 콜해서 환율값 가져오는 api
+     * 이후, 카프카에 통화별 환율 메시지 전송
      */
     @GetMapping("/batch/current-currency")
     public ResponseEntity<List<ExchangeResponseDto>> getCurrentCurrencyAll() {
@@ -40,7 +40,7 @@ public class RateController {
     }
 
     /**
-     * 실시간 환율 가져오는 api는 현재 유료 서비스라서 임의로 실시간 환율 주는 api
+     * 특정 통화 환율 갱신하는 api
      * db에 저장된 기준값을 기준으로 -10 ~ +10 까지 랜덤으로 값을 줌
      */
     @GetMapping("/current-currency/{ticker}")
