@@ -1,4 +1,4 @@
-package com.notier;
+package com.notier.config;
 
 import java.util.HashMap;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

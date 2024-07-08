@@ -1,4 +1,4 @@
-package com.notier;
+package com.notier.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
