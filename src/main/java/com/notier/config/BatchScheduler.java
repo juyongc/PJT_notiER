@@ -1,4 +1,4 @@
-package com.notier;
+package com.notier.config;
 
 import com.notier.rateService.RedisService;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class BatchScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
     public void resetAlarmsAtMidNight() {
         redisService.resetTodayAlarms();
     }

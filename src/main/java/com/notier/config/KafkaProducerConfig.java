@@ -1,4 +1,4 @@
-package com.notier;
+package com.notier.config;
 
 import com.notier.repository.CurrencyRepository;
 import java.util.HashMap;

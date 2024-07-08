@@ -1,4 +1,4 @@
-package com.notier;
+package com.notier.config;
 
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
