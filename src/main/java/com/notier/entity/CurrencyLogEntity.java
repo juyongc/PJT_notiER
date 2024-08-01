@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CURRENCY_LOGS")
+@Table(name = "CURRENCY_LOGS", indexes = {
+    @Index(name = "idx_currencylog_ticker_createdAt", columnList = "ticker, createdAt DESC")
+})
 public class CurrencyLogEntity extends BaseEntity {
 
     @Id

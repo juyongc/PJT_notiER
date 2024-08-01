@@ -25,7 +25,7 @@ public class BatchScheduler {
     private final RedisService redisService;
 
     //    @Scheduled(cron = "0 * * * * *")    // 매분 실행
-    @Scheduled(cron = "0 */3 * * * *")    // 3분마다 실행
+    @Scheduled(cron = "0 */59 * * * *")    // 3분마다 실행 -> 다른 개발위해 59분으로 변경
     public void runExchangeBatchScheduler() {
         try {
             Job callJob = jobRegistry.getJob("callInternalExchangeApiJob");
