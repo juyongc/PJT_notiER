@@ -32,53 +32,16 @@ public class CouponService {
 
     private final RetryTemplate retryTemplate;
 
-    @Transactional
-    public Boolean issueCouponWithRetry(CreateCouponRequestDto createCouponRequestDto) {
-        return retryTemplate.execute(context -> issueCoupon(createCouponRequestDto));
-    }
+//    @Transactional
+//    public Boolean issueCouponWithRetry(CreateCouponRequestDto createCouponRequestDto) {
+//        return retryTemplate.execute(context -> issueCoupon(createCouponRequestDto));
+//    }
 
     @Transactional
     public Boolean issueCoupon(CreateCouponRequestDto createCouponRequestDto) {
 
-//        try {
-//            Long userId = Long.valueOf(createCouponRequestDto.getUserId());
-//            Long couponId = Long.valueOf(createCouponRequestDto.getCouponId());
-//
-//            MemberEntity memberEntity = memberRepository.findById(userId)
-//                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 사용자입니다"));
-//
-//            CouponEntity couponEntity = couponRepository.findById(couponId)
-//                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 쿠폰입니다"));
-//
-//            CouponCountEntity couponCountEntity = couponCountRepository.findCouponCountEntityByCouponEntity(
-//                couponEntity);
-//
-//            if (couponEntity.getLimitNumber() > couponCountEntity.getIssuedCount()) {
-//
-//                couponCountEntity.increaseIssuedCount();
-//                couponCountRepository.save(couponCountEntity);
-//
-//                MemberCouponMapEntity memberCouponMapEntity = MemberCouponMapEntity.builder()
-//                    .couponEntity(couponEntity)
-//                    .memberEntity(memberEntity)
-//                    .expirationDate(LocalDate.now().plusDays(couponEntity.getExpirationPeriod()))
-//                    .isUsed(false)
-//                    .build();
-//
-//                memberCouponMapRepository.save(memberCouponMapEntity);
-//
-//                return Boolean.TRUE;
-//            }
-//
-//            return Boolean.FALSE;
-//        } catch (Exception e) {
-//            log.info("catch from service");
-//            throw e;
-//        }
-
         Long userId = Long.valueOf(createCouponRequestDto.getUserId());
         Long couponId = Long.valueOf(createCouponRequestDto.getCouponId());
-
         MemberEntity memberEntity = memberRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("존재하지 않는 사용자입니다"));
 

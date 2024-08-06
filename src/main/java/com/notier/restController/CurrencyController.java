@@ -72,29 +72,20 @@ public class CurrencyController {
         return ResponseEntity.ok(currencyHistoryInfoList);
     }
 
-    @PostMapping("/coupon")
+    @PostMapping("/coupon/optimistic")
     public ResponseEntity<Boolean> createCoupon(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
 
-        try {
-            Boolean issuedCoupon = couponService.issueCoupon(createCouponRequestDto);
-            return ResponseEntity.ok(issuedCoupon);
-        } catch (ObjectOptimisticLockingFailureException e) {
-            log.info("Controller Catched");
-            log.info(e.getMessage());
-        }
+        Boolean issuedCoupon = retryTemplate.execute(context -> {
+            log.info("Controller Retry attempt: {}", context.getRetryCount());
+            try {
+                return couponService.issueCoupon(createCouponRequestDto);
+            } catch (ObjectOptimisticLockingFailureException e) {
+                log.error("Controller Optimistic lock exception, retrying...", e);
+                throw e;
+            }
+        });
 
-//        Boolean issuedCoupon = retryTemplate.execute(context -> {
-//            log.info("Controller Retry attempt: {}", context.getRetryCount());
-//            try {
-//                return couponService.issueCouponWithRetry(createCouponRequestDto);
-//            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
-//                log.error("Controller Optimistic lock exception, retrying...", e);
-//                throw e;
-//            }
-//        });
-
-//        return ResponseEntity.ok(issuedCoupon);
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(issuedCoupon);
     }
 
 }
