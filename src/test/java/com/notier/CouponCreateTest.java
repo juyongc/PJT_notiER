@@ -1,7 +1,9 @@
 package com.notier;
 
+import com.notier.entity.CouponCountEntity;
 import com.notier.entity.CouponEntity;
 import com.notier.entity.CurrencyEntity;
+import com.notier.repository.CouponCountRepository;
 import com.notier.repository.CouponRepository;
 import com.notier.repository.CurrencyRepository;
 import java.util.List;
@@ -16,6 +18,8 @@ class CouponCreateTest {
 
     @Autowired
     private CouponRepository couponRepository;
+    @Autowired
+    private CouponCountRepository couponCountRepository;
 
     @Autowired
     private CurrencyRepository currencyRepository;
@@ -34,14 +38,39 @@ class CouponCreateTest {
                 .currencyEntity(currencyEntity)
                 .explanation("welcome coupon")
                 .expirationPeriod(7L)
-                .limitNumber(3)
+                .limitNumber(8)
                 .salePercent(30)
                 .build();
 
             couponRepository.save(couponEntity);
+
+            CouponCountEntity couponCountEntity = CouponCountEntity.builder()
+                .couponEntity(couponEntity)
+                .issuedCount(0)
+                .build();
+
+            couponCountRepository.save(couponCountEntity);
         }
 
         Assertions.assertThat((long) couponRepository.findAll().size()).isEqualTo(currencyEntities.size());
+    }
+
+    @Test
+    void couponCountCreate() {
+
+        List<CouponEntity> couponEntities = couponRepository.findAll();
+
+        for (CouponEntity couponEntity : couponEntities) {
+
+            CouponCountEntity couponCountEntity = CouponCountEntity.builder()
+                .couponEntity(couponEntity)
+                .issuedCount(0)
+                .build();
+
+            couponCountRepository.save(couponCountEntity);
+
+        }
+
     }
 
 }

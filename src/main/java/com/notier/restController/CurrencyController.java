@@ -4,6 +4,7 @@ import com.notier.dto.CreateCouponRequestDto;
 import com.notier.dto.CurrencyAllResponseDto;
 import com.notier.dto.CurrencyHistoryResponseDto;
 import com.notier.viewService.CouponService;
+import com.notier.viewService.CouponServiceHelper;
 import com.notier.viewService.CurrencyService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +31,8 @@ public class CurrencyController {
 
     private final CurrencyService currencyService;
     private final CouponService couponService;
+    private final CouponServiceHelper couponServiceHelper;
+    private final RetryTemplate retryTemplate;
 
     @GetMapping("/all")
     public ResponseEntity<List<CurrencyAllResponseDto>> getCurrencyAll() {
@@ -70,8 +75,26 @@ public class CurrencyController {
     @PostMapping("/coupon")
     public ResponseEntity<Boolean> createCoupon(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
 
-        Boolean issuedCoupon = couponService.issueCoupon(createCouponRequestDto);
-        return ResponseEntity.ok(issuedCoupon);
+        try {
+            Boolean issuedCoupon = couponService.issueCoupon(createCouponRequestDto);
+            return ResponseEntity.ok(issuedCoupon);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.info("Controller Catched");
+            log.info(e.getMessage());
+        }
+
+//        Boolean issuedCoupon = retryTemplate.execute(context -> {
+//            log.info("Controller Retry attempt: {}", context.getRetryCount());
+//            try {
+//                return couponService.issueCouponWithRetry(createCouponRequestDto);
+//            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
+//                log.error("Controller Optimistic lock exception, retrying...", e);
+//                throw e;
+//            }
+//        });
+
+//        return ResponseEntity.ok(issuedCoupon);
+        return ResponseEntity.ok(true);
     }
 
 }

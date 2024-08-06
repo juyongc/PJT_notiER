@@ -13,5 +13,5 @@ public class CreateCouponRequestDto {
 
     private String userId;
     private String couponId;
-    private String ticker;
+//    private String ticker;
 }

@@ -101,7 +101,7 @@
                           <td><a href="#" onclick="toggleHistory('${currency.ticker}', this)">${currency.ticker}</a></td>
                           <td>${currency.explanation}</td>
                           <td>${currency.exchangeRate}</td>
-                          <td><button onclick="requestCoupon('${currency.ticker}', ${currency.couponId}, ${mockUserId})">Request Exchange Coupon</button></td>
+                          <td><button onclick="requestCoupon(${currency.couponId}, ${mockUserId})">Request Exchange Coupon</button></td>
                         `;
         tbody.appendChild(row);
       });
@@ -130,7 +130,7 @@
     fetchHistoryData(ticker, row);
   }
 
-  function requestCoupon(ticker, couponId, userId) {
+  function requestCoupon(couponId, userId) {
     const jwtToken = localStorage.getItem('jwtToken'); // JWT 토큰 가져오기
 
     fetch('/api/currency/coupon', {
