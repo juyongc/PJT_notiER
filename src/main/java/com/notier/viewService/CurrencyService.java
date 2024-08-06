@@ -11,6 +11,7 @@ import com.notier.repository.CurrencyRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,5 +66,11 @@ public class CurrencyService {
                 .ticker(currencyLogEntity.getTicker())
                 .exchangeRate(currencyLogEntity.getExchangeRate())
                 .date(currencyLogEntity.getCreatedAt().toLocalDate()).build());
+    }
+
+    public CurrencyEntity findCurrencyEntityByTicker(String ticker) {
+
+        return currencyRepository.findCurrencyEntityByTicker(ticker)
+            .orElseThrow(() -> new NoSuchElementException("존재하지않는 ticker입니다"));
     }
 }
