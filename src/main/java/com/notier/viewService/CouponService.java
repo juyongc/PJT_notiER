@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,7 +39,7 @@ public class CouponService {
     /**
      * Redisson distributed Lock!!!
      */
-    @Transactional
+//    @Transactional
     public Boolean issueCoupon(CreateCouponRequestDto createCouponRequestDto) {
 
         Long userId = Long.valueOf(createCouponRequestDto.getUserId());
