@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,11 +31,19 @@ public class CouponCountEntity {
 
     private Integer issuedCount;
 
-    @Version
-    private Integer version;
+//    @Version
+//    private Integer version;
 
     public void increaseIssuedCount() {
         this.issuedCount++;
     }
 
+    @Override
+    public String toString() {
+        return "CouponCountEntity{" +
+            "id=" + id +
+            ", couponEntity=" + couponEntity +
+            ", issuedCount=" + issuedCount +
+            '}';
+    }
 }

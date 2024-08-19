@@ -25,7 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest
 @Transactional
 @Slf4j
-public class CouponConcurrencyTest {
+class CouponConcurrencyTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;

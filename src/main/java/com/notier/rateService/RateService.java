@@ -116,6 +116,7 @@ public class RateService {
                     log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
                         previousExchangeRate);
                 } else {
+                    log.info("null is null");
                     return null;
                 }
 

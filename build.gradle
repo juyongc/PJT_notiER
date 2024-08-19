@@ -27,7 +27,10 @@ dependencies {
 //    implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.retry:spring-retry'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.34.1'
+
     implementation 'com.slack.api:slack-api-client:1.40.2'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-cache'

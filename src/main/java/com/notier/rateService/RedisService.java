@@ -2,80 +2,73 @@ package com.notier.rateService;
 
 import com.notier.entity.AlarmEntity;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RKeys;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class RedisService {
 
     private static final String ALARM_PREFIX_KEY = "check_send_alarm:";
-    private final RedisTemplate<String, Object> objectRedisTemplate;
-    private final RedisTemplate<String, String> stringRedisTemplate;
 
-    public RedisService(@Qualifier("valueObjectRedisTemplate") RedisTemplate<String, Object> objectRedisTemplate,
-        @Qualifier("valueStringRedisTemplate") RedisTemplate<String, String> stringRedisTemplate) {
-        this.objectRedisTemplate = objectRedisTemplate;
-        this.stringRedisTemplate = stringRedisTemplate;
+    private final RedissonClient redissonClient;
+
+    public void saveObject(String key, Object value) {
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+        bucket.set(value);
     }
 
-    public void saveObjectValue(String key, Object value) {
-        objectRedisTemplate.opsForValue().set(key, value);
+    public Object getObject(String key) {
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+        return bucket.get();
     }
 
-    public Object getObjectValue(String key) {
-        return objectRedisTemplate.opsForValue().get(key);
+    public void saveString(String key, String value) {
+        RBucket<String> bucket = redissonClient.getBucket(key);
+        bucket.set(value);
     }
 
-    public void saveStringValue(String key, String value) {
-        stringRedisTemplate.opsForValue().set(key, value);
-    }
-
-    public String getStringValue(String key) {
-        return stringRedisTemplate.opsForValue().get(key);
+    public String getString(String key) {
+        RBucket<String> bucket = redissonClient.getBucket(key);
+        return bucket.get();
     }
 
     public boolean checkAlreadySendAlarm(AlarmEntity alarmEntity) {
+        String key =
+            ALARM_PREFIX_KEY + alarmEntity.getCurrencyEntity().getTicker() + alarmEntity.getMemberEntity().getId();
+        RBucket<String> bucket = redissonClient.getBucket(key);
 
-        String key = ALARM_PREFIX_KEY + alarmEntity.getCurrencyEntity().getTicker() + alarmEntity.getMemberEntity()
-            .getId();
-        Boolean isAlarmed = stringRedisTemplate.hasKey(key);
-
-        return Boolean.TRUE.equals(isAlarmed);
+        return bucket.isExists();
     }
 
     public void setSendAlarm(AlarmEntity alarmEntity) {
-        String key = ALARM_PREFIX_KEY + alarmEntity.getCurrencyEntity().getTicker() + alarmEntity.getMemberEntity()
-            .getId();
+        String key =
+            ALARM_PREFIX_KEY + alarmEntity.getCurrencyEntity().getTicker() + alarmEntity.getMemberEntity().getId();
+        RBucket<String> bucket = redissonClient.getBucket(key);
 
-        Boolean isAlarmed = stringRedisTemplate.hasKey(key);
-
-        if (Boolean.FALSE.equals(isAlarmed)) {
-            stringRedisTemplate.opsForValue().set(key, "true");
+        if (!bucket.isExists()) {
+            bucket.set("true");
         }
     }
 
     public void resetTodayAlarms() {
-
         Set<String> keys = scanKeys(ALARM_PREFIX_KEY + "*");
-        stringRedisTemplate.delete(keys);
-
+        redissonClient.getKeys().delete(keys.toArray(new String[0]));
     }
 
     private Set<String> scanKeys(String pattern) {
-
+        RKeys rKeys = redissonClient.getKeys();
+        Iterable<String> keysIterable = rKeys.getKeysByPattern(pattern);
         Set<String> keys = new HashSet<>();
 
-        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(1000).build();
-        Cursor<byte[]> scan = Objects.requireNonNull(stringRedisTemplate.getConnectionFactory()).getConnection()
-            .scan(options);
-
-        while (scan.hasNext()) {
-            keys.add(new String(scan.next()));
+        for (String key : keysIterable) {
+            keys.add(key);
         }
 
         return keys;

@@ -73,7 +73,8 @@ public class CurrencyController {
     }
 
     @PostMapping("/coupon/optimistic")
-    public ResponseEntity<Boolean> createCoupon(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
+    public ResponseEntity<Boolean> createCouponOptimisticLock(
+        @RequestBody CreateCouponRequestDto createCouponRequestDto) {
 
         Boolean issuedCoupon = retryTemplate.execute(context -> {
             log.info("Controller Retry attempt: {}", context.getRetryCount());
@@ -84,6 +85,15 @@ public class CurrencyController {
                 throw e;
             }
         });
+
+        return ResponseEntity.ok(issuedCoupon);
+    }
+
+
+    @PostMapping("/coupon")
+    public ResponseEntity<Boolean> createCoupon(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
+
+        Boolean issuedCoupon = couponService.issueCoupon(createCouponRequestDto);
 
         return ResponseEntity.ok(issuedCoupon);
     }

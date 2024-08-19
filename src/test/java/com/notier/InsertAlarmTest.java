@@ -3,11 +3,13 @@ package com.notier;
 import com.notier.entity.AlarmEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.entity.MemberEntity;
+import com.notier.rateService.RedisService;
 import com.notier.repository.AlarmRepository;
 import com.notier.repository.CurrencyRepository;
 import com.notier.repository.MemberRepository;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class InsertAlarmTest {
+class InsertAlarmTest {
 
     private final Random random = new Random();
     @Autowired
@@ -24,6 +26,8 @@ public class InsertAlarmTest {
     private CurrencyRepository currencyRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private RedisService redisService;
 
     @Test
     void insertAlarmSettingCode() {
@@ -58,5 +62,18 @@ public class InsertAlarmTest {
         }
 
     }
+
+    @Test
+    void RedisTest() {
+        AlarmEntity alarmEntity = alarmRepository.findAlarmEntitiesByCurrencyTicker("USD").getFirst();
+        redisService.setSendAlarm(alarmEntity);
+        String key =
+            "check_send_alarm:" + alarmEntity.getCurrencyEntity().getTicker() + alarmEntity.getMemberEntity().getId();
+        System.out.println("alarm key = " + key);
+        boolean checkedAlreadySendAlarm = redisService.checkAlreadySendAlarm(alarmEntity);
+
+        Assertions.assertThat(checkedAlreadySendAlarm).isTrue();
+    }
+
 
 }
