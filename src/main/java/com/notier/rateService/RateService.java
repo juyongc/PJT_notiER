@@ -61,7 +61,8 @@ public class RateService {
      * key가 country라서 안되는 상황
      * => ConsumerRecord 를 사용해서 key, value를 가져올 수 있다
      */
-    @KafkaListener(id = "currency-listen", topics = {"currency-USD", "currency-JPY"})
+    @KafkaListener(id = "currency-listen", topicPattern = "currency-.*")
+//    @KafkaListener(id = "currency-listen", topics = {"currency-USD", "currency-JPY"})
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
         String ticker = consumerRecord.key();
@@ -116,7 +117,7 @@ public class RateService {
                     log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
                         previousExchangeRate);
                 } else {
-                    log.info("null is null");
+                    log.info(memberEntity.getName() + "님이 지정하신 지정가 미도달 상태입니다");
                     return null;
                 }
 

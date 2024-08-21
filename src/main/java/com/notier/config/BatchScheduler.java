@@ -24,7 +24,8 @@ public class BatchScheduler {
     private final JobRegistry jobRegistry;
     private final RedisService redisService;
 
-    //        @Scheduled(cron = "0 * * * * *")    // 매분 실행
+    //    @Scheduled(cron = "0 * * * * *")    // 매분 실행
+    @Scheduled(cron = "0 0/5 * * * *")    // 10분 실행
     public void runExchangeBatchScheduler() {
         try {
             Job callJob = jobRegistry.getJob("callInternalExchangeApiJob");
