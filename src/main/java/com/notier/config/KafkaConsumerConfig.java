@@ -18,7 +18,7 @@ public class KafkaConsumerConfig {
         HashMap<String, Object> consumerProps = new HashMap<>();
 
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:10000");
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "error-handler-group");
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "currency-group");
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

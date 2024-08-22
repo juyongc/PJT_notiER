@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,12 +56,9 @@ public class RateService {
     }
 
     /**
-     * key가 안받아지고 data만 받아짐
-     * key가 country라서 안되는 상황
-     * => ConsumerRecord 를 사용해서 key, value를 가져올 수 있다
+     * 환율 변경된 정보 받으면 카프카 리스너가 행동할 메서드
+     * - 알람 전송
      */
-    @KafkaListener(id = "currency-listen", topicPattern = "currency-.*")
-//    @KafkaListener(id = "currency-listen", topics = {"currency-USD", "currency-JPY"})
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
         String ticker = consumerRecord.key();
@@ -117,7 +113,7 @@ public class RateService {
                     log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
                         previousExchangeRate);
                 } else {
-                    log.info(memberEntity.getName() + "님이 지정하신 지정가 미도달 상태입니다");
+//                    log.info(memberEntity.getName() + "님이 지정하신 지정가 미도달 상태입니다");
                     return null;
                 }
 

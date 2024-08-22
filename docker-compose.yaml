@@ -32,6 +32,7 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     networks:
       - kafka_network
     volumes:
@@ -58,6 +59,7 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     networks:
       - kafka_network
     volumes:
@@ -84,6 +86,7 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_MIN_INSYNC_REPLICAS=2
     networks:
       - kafka_network
     volumes:

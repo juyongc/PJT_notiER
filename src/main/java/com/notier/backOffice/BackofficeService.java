@@ -73,7 +73,7 @@ public class BackofficeService {
         currencyEntities.stream()
             .filter(ce -> !ce.getTicker().equals("KRW"))
             .forEach(ce -> {
-                Long currencyRate = ce.getExchangeRate() + random.nextInt(31) - 5;
+                Long currencyRate = ce.getExchangeRate() + random.nextInt(31) - 15;
                 responseDtoList.add(
                     BackofficeCurrencyResponseDto.builder()
                         .ticker(ce.getTicker())
