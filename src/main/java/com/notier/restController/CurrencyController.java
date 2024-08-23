@@ -4,7 +4,6 @@ import com.notier.dto.CreateCouponRequestDto;
 import com.notier.dto.CurrencyAllResponseDto;
 import com.notier.dto.CurrencyHistoryResponseDto;
 import com.notier.viewService.CouponService;
-import com.notier.viewService.CouponServiceHelper;
 import com.notier.viewService.CurrencyService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,8 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class CurrencyController {
 
     private final CurrencyService currencyService;
+    //    private final CouponOptimisticService couponService;
     private final CouponService couponService;
-    private final CouponServiceHelper couponServiceHelper;
     private final RetryTemplate retryTemplate;
 
     @GetMapping("/all")

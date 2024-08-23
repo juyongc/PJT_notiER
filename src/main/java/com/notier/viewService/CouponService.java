@@ -4,12 +4,8 @@ import com.notier.dto.CreateCouponRequestDto;
 import com.notier.entity.CouponEntity;
 import com.notier.entity.CurrencyEntity;
 import com.notier.entity.MemberEntity;
-import com.notier.repository.CouponCountRepository;
 import com.notier.repository.CouponRepository;
-import com.notier.repository.MemberCouponMapRepository;
 import com.notier.repository.MemberRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
@@ -18,22 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Slf4j
-//@Transactional
+@Transactional
 @Service
 public class CouponService {
 
     private final MemberRepository memberRepository;
     private final CouponRepository couponRepository;
-    private final CouponCountRepository couponCountRepository;
-    private final MemberCouponMapRepository memberCouponMapRepository;
     private final RedissonClient redissonClient;
     private final CouponLockService couponLockService;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
 
     /**
@@ -57,8 +49,8 @@ public class CouponService {
                 return Boolean.FALSE;
             }
 
-            log.info("Starting Point : user = {}", userId);
-            log.info("who get a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
+//            log.info("Starting Point : user = {}", userId);
+//            log.info("who get a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
 
             MemberEntity memberEntity = memberRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 사용자입니다"));
@@ -74,7 +66,7 @@ public class CouponService {
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
-                log.info("who unlock a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
+//                log.info("who unlock a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
             }
         }
     }

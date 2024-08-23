@@ -5,7 +5,6 @@ import com.notier.entity.CouponEntity;
 import com.notier.entity.MemberCouponMapEntity;
 import com.notier.entity.MemberEntity;
 import com.notier.repository.CouponCountRepository;
-import com.notier.repository.CouponRepository;
 import com.notier.repository.MemberCouponMapRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CouponLockService {
 
-    private final CouponRepository couponRepository;
     private final CouponCountRepository couponCountRepository;
     private final MemberCouponMapRepository memberCouponMapRepository;
 
@@ -26,7 +24,6 @@ public class CouponLockService {
     /**
      * Redisson distributed Lock!!!
      */
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Transactional
     public Boolean lockCouponCounter(MemberEntity memberEntity, CouponEntity couponEntity) {
 
@@ -35,9 +32,6 @@ public class CouponLockService {
         if (couponEntity.getLimitNumber() > couponCountEntity.getIssuedCount()) {
 
             couponCountEntity.increaseIssuedCount();
-
-            log.info("CouponCountEntity = {}", couponCountEntity);
-            log.info("check issuedCount = {}", couponCountEntity.getIssuedCount());
 
             couponCountRepository.save(couponCountEntity);
 

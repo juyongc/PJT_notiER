@@ -38,7 +38,7 @@ class CouponCreateTest {
                 .currencyEntity(currencyEntity)
                 .explanation("welcome coupon")
                 .expirationPeriod(7L)
-                .limitNumber(8)
+                .limitNumber(500)
                 .salePercent(30)
                 .build();
 
