@@ -53,7 +53,6 @@ public class SseService {
         }
 
         try {
-            log.info("sendAlarmResponseDto = " + sendAlarmResponseDto);
             emitter.send(SseEmitter.event()
                 .id(emitterId)
                 .name("currency-update : " + sendAlarmResponseDto.getTicker())

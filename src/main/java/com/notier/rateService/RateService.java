@@ -62,7 +62,6 @@ public class RateService {
     public void listenCurrencyAlarm(ConsumerRecord<String,String> consumerRecord) {
 
         String ticker = consumerRecord.key();
-        log.info("current ticker = " + ticker);
 
         List<AlarmEntity> alarmEntities = alarmRepository.findAlarmEntitiesByCurrencyTicker(ticker);
 
@@ -113,7 +112,6 @@ public class RateService {
                     log.info("\n" + "현재가 = {}, 지정가 = {}, 과거가 = {}", currentExchangeRate, userWishRate,
                         previousExchangeRate);
                 } else {
-//                    log.info(memberEntity.getName() + "님이 지정하신 지정가 미도달 상태입니다");
                     return null;
                 }
 

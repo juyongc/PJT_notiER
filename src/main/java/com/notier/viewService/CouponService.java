@@ -49,9 +49,6 @@ public class CouponService {
                 return Boolean.FALSE;
             }
 
-//            log.info("Starting Point : user = {}", userId);
-//            log.info("who get a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
-
             MemberEntity memberEntity = memberRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 사용자입니다"));
 
@@ -66,7 +63,6 @@ public class CouponService {
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
-//                log.info("who unlock a lock? INFO : coupon = {}, user = {}, lockkey = {}", couponId, userId, lockKey);
             }
         }
     }
