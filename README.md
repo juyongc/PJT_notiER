@@ -85,4 +85,4 @@
 
 ## 구조도
 
-![구조도](https://github.com/user-attachments/assets/1b7de649-55d0-43cf-8b2d-8737c02a0b9b)
+<img width="669" alt="image" src="https://github.com/user-attachments/assets/e3a4b2fb-ad1d-4eba-8898-b97bc12dc41f" />
