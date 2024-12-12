@@ -3,6 +3,7 @@ package com.notier.restController;
 import com.notier.dto.CreateCouponRequestDto;
 import com.notier.dto.CurrencyAllResponseDto;
 import com.notier.dto.CurrencyHistoryResponseDto;
+import com.notier.viewService.CouponLockService;
 import com.notier.viewService.CouponService;
 import com.notier.viewService.CurrencyService;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class CurrencyController {
     private final CurrencyService currencyService;
     //    private final CouponOptimisticService couponService;
     private final CouponService couponService;
+    private final CouponLockService couponLockService;
     private final RetryTemplate retryTemplate;
 
     @GetMapping("/all")
@@ -57,13 +59,10 @@ public class CurrencyController {
 
         LocalDateTime testTime = LocalDateTime.of(2024, 6, 20, 0, 0, 0);
 
-//        LocalDateTime aWeekAgo = LocalDateTime.now().minusDays(7);
         PageRequest pageRequest = PageRequest.of(page - 1, size);
 
         Page<CurrencyHistoryResponseDto> currencyHistoryInfoList = currencyService.findCurrencyHistoryInfoList(ticker,
             testTime, pageRequest);
-//        Page<CurrencyHistoryResponseDto> currencyHistoryInfoList = currencyService.findCurrencyHistoryInfoList(ticker,
-//            aWeekAgo, pageRequest);
 
         currencyHistoryInfoList.stream()
             .forEach(currencyHistoryResponseDto -> log.info(currencyHistoryResponseDto.toString()));
@@ -93,6 +92,15 @@ public class CurrencyController {
     public ResponseEntity<Boolean> createCoupon(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
 
         Boolean issuedCoupon = couponService.issueCoupon(createCouponRequestDto);
+
+        return ResponseEntity.ok(issuedCoupon);
+    }
+
+
+    @PostMapping("/coupon/atomic")
+    public ResponseEntity<Boolean> createCouponAtomic(@RequestBody CreateCouponRequestDto createCouponRequestDto) {
+
+        Boolean issuedCoupon = couponLockService.lockCouponCounterAtomic(createCouponRequestDto);
 
         return ResponseEntity.ok(issuedCoupon);
     }

@@ -27,7 +27,6 @@ public class CouponService {
     private final RedissonClient redissonClient;
     private final CouponLockService couponLockService;
 
-
     /**
      * Redisson distributed Lock!!!
      */
